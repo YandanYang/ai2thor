@@ -47,17 +47,17 @@ public class EditorObjExporter : ScriptableObject {
             Vector3 wv = mf.transform.TransformPoint(lv);
 
             //This is sort of ugly - inverting x-component since we're in
-            //a different coordinate system than "everyone" is "used to".
-            // sb.Append(string.Format("v {0} {1} {2}\n", -wv.x, wv.y, wv.z));
-            sb.Append(string.Format("v {0} {2} {1}\n", -wv.x, wv.y, wv.z));
+            // a different coordinate system than "everyone" is "used to".
+            sb.Append(string.Format("v {0} {1} {2}\n", -wv.x, wv.y, wv.z));
+            // sb.Append(string.Format("v {0} {2} {1}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
 
         foreach (Vector3 lv in m.normals) {
             Vector3 wv = mf.transform.TransformDirection(lv);
 
-            sb.Append(string.Format("vn {0} {2} {1}\n", -wv.x, wv.y, wv.z));
-            // sb.Append(string.Format("vn {0} {1} {2}\n", -wv.x, wv.y, wv.z));
+            // sb.Append(string.Format("vn {0} {2} {1}\n", -wv.x, wv.y, wv.z));
+            sb.Append(string.Format("vn {0} {1} {2}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
 
@@ -142,7 +142,7 @@ public class EditorObjExporter : ScriptableObject {
                 sw.Write("Ks  {0} {1} {2}\n",r,g,b);
                 sw.Write("d  {0}\n", d);
                 sw.Write("Ns  0.0\n");
-                sw.Write("illum 2\n");
+                sw.Write("illum 1\n");
 
                 if (kvp.Value.textureName != null) {
                     string destinationFile = kvp.Value.textureName;
@@ -253,8 +253,7 @@ public class EditorObjExporter : ScriptableObject {
     static void ExportWholeSelectionToSingle() {
         if (!CreateTargetFolder())
             return;
-
-
+        
         Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
 
         if (selection.Length == 0) {
@@ -304,6 +303,7 @@ public class EditorObjExporter : ScriptableObject {
         if (!CreateTargetFolder())
             return;
 
+        // var childSimObjects = Resources.FindObjectsOfTypeAll(typeof(SimObjPhysics));
         Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
 
         if (selection.Length == 0) {
@@ -333,4 +333,64 @@ public class EditorObjExporter : ScriptableObject {
             EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
     }
 
+
+
+
+    [MenuItem("Custom/Export/ExportObject each object to single OBJ")]
+    public static void ExportEachObectToSingle() {
+        if (!CreateTargetFolder())
+            return;
+        ExportEachObjectToSingle("Walls");
+        ExportEachObjectToSingle("Objects");
+        ExportEachObjectToSingle("Ceiling");
+        ExportEachObjectToSingle("Floor");
+    }
+    
+    
+    static void ExportEachObjectToSingle(String parentType ) {
+        if (!CreateTargetFolder())
+            return;
+        MonoBehaviour[] objects = null;
+        if (parentType.Equals("Ceiling")){
+            objects = GameObject.Find(parentType).GetComponentsInChildren<StructureObject>();
+        }
+        else{
+            objects = GameObject.Find(parentType).GetComponentsInChildren<SimObjPhysics>();
+        }
+
+        // if (objects.Length == 0) {
+        //     EditorUtility.DisplayDialog("No source object available!","","");
+        //     return;
+        // }
+
+        int exportedObjects = 0;
+
+
+        for (int i = 0; i < objects.Length; i++) {
+            var gameobject = objects[i];
+            if (!gameobject.transform.parent.name.Equals(parentType)){
+                continue;
+            }
+            //exclude external wall
+            if (gameobject.transform.name.Contains("exterior")){
+                continue;
+            }
+            Component[] meshfilter = gameobject.transform.GetComponentsInChildren(typeof(MeshFilter));
+
+            MeshFilter[] mf = new MeshFilter[meshfilter.Length];
+
+            for (int m = 0; m < meshfilter.Length; m++) {
+                exportedObjects++;
+                mf[m] = (MeshFilter)meshfilter[m];
+            }
+
+            MeshesToFile(mf, targetFolder, gameobject.transform.name);
+        }
+
+        // if (exportedObjects > 0) {
+        //     EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " .obj files of "+ parentType, "");
+        // } else
+        //     EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
+    }
+    
 }
