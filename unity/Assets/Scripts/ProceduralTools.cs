@@ -1465,6 +1465,10 @@ namespace Thor.Procedural {
             // also add their rigidbodies to the list of all rigid body objects in scene
             var sceneManager = GameObject.FindObjectOfType<PhysicsSceneManager>();
             sceneManager.SetupScene(false);
+            
+            // output objects in scene
+            EditorObjExporter.ExportEachObectToSingle();
+            
             var agentManager = GameObject.Find("PhysicsSceneManager").GetComponentInChildren<AgentManager>();
             agentManager.ResetSceneBounds();
 
