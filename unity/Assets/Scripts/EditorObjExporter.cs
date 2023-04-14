@@ -78,20 +78,38 @@ public class EditorObjExporter : ScriptableObject {
                 ObjMaterial objMaterial = new ObjMaterial();
 
                 objMaterial.name = mats[material].name;
+                var flag = mats[material].HasProperty("_MainTex");
+                if  (flag){
 
-                if (mats[material].mainTexture)
-                    objMaterial.textureName = EditorUtility.GetAssetPath(mats[material].mainTexture);
-                else
+                    if (mats[material].mainTexture){
+                        objMaterial.textureName = EditorUtility.GetAssetPath(mats[material].mainTexture);
+                        if (objMaterial.textureName.Contains("ScreenDecalStencil")){
+                            material = material;
+                        }
+                    }
+                    else
                     objMaterial.textureName = null;
-                objMaterial.color_red = mats[material].color.r;
-                objMaterial.color_green = mats[material].color.g;
-                objMaterial.color_blue = mats[material].color.b;
-                objMaterial.color_blue = mats[material].color.b;
-                objMaterial.transparent = mats[material].color.a;
+                }
+                else{
+                    material = material;
+                }
+                
+                flag = mats[material].HasProperty("_Color");
+                if  (flag){
+                    objMaterial.color_red = mats[material].color.r;
+                    objMaterial.color_green = mats[material].color.g;
+                    objMaterial.color_blue = mats[material].color.b;
+                    objMaterial.transparent = mats[material].color.a;
+                }
+                else {
+                    material = material;
+                }
                 //objMaterial.NormalMapName = null;
 
                 materialList.Add(objMaterial.name, objMaterial);
+                material = material;
             } catch (ArgumentException) {
+                material = material;
                 //Already in the dictionary
             }
 
