@@ -35,13 +35,14 @@ public class EditorObjExporter : ScriptableObject {
     private static string targetFolder = "ExportedObj";
 
 
+// 调用方法：FindFile(@"G:\xq\", "test.txt");
     private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList) {
         Mesh m = mf.sharedMesh;
         Material[] mats = mf.GetComponent<Renderer>().sharedMaterials;
         var debug = mf.GetComponent<Renderer>();
 
         StringBuilder sb = new StringBuilder();
-
+        
         sb.Append("g ").Append(mf.name).Append("\n");
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
@@ -82,10 +83,11 @@ public class EditorObjExporter : ScriptableObject {
                 if  (flag){
 
                     if (mats[material].mainTexture){
-                        objMaterial.textureName = EditorUtility.GetAssetPath(mats[material].mainTexture);
-                        if (objMaterial.textureName.Contains("ScreenDecalStencil")){
-                            material = material;
-                        }
+                        string[] filepath = Directory.GetFiles("C:\\workspace\\ai2thor\\unity\\ExportedObj\\material\\",mats[material].mainTexture.name +".*");
+                        objMaterial.textureName = filepath[0].Replace("\\","/");
+                        // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
+                    //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
+                        // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
                     }
                     else
                     objMaterial.textureName = null;
@@ -231,130 +233,131 @@ public class EditorObjExporter : ScriptableObject {
         try {
             System.IO.Directory.CreateDirectory(targetFolder);
         } catch {
-            EditorUtility.DisplayDialog("Error!", "Failed to create target folder!", "");
+            // EditorUtility.DisplayDialog("Error!", "Failed to create target folder!", "");
             return false;
         }
 
         return true;
     }
 
-    [MenuItem("Custom/Export/Export all MeshFilters in selection to separate OBJs")]
-    static void ExportSelectionToSeparate() {
-        if (!CreateTargetFolder())
-            return;
+//    // [MenuItem("Custom/Export/Export all MeshFilters in selection to separate OBJs")]
+//     static void ExportSelectionToSeparate() {
+//         if (!CreateTargetFolder())
+//             return;
 
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
+//         Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
 
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
+//         if (selection.Length == 0) {
+//             // EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
+//             return;
+//         }
 
-        int exportedObjects = 0;
+//         int exportedObjects = 0;
 
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
+//         for (int i = 0; i < selection.Length; i++) {
+//             Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
 
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                MeshToFile((MeshFilter)meshfilter[m], targetFolder, selection[i].name + "_" + i + "_" + m);
-            }
-        }
+//             for (int m = 0; m < meshfilter.Length; m++) {
+//                 exportedObjects++;
+//                 MeshToFile((MeshFilter)meshfilter[m], targetFolder, selection[i].name + "_" + i + "_" + m);
+//             }
+//         }
 
-        if (exportedObjects > 0)
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
-        else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
+//         // if (exportedObjects > 0)
+//             // EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
+//         // else
+//             // EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
+//     }
 
-    [MenuItem("Custom/Export/Export whole selection to single OBJ")]
-    static void ExportWholeSelectionToSingle() {
-        if (!CreateTargetFolder())
-            return;
+  //  [MenuItem("Custom/Export/Export whole selection to single OBJ")]
+    // static void ExportWholeSelectionToSingle() {
+    //     if (!CreateTargetFolder())
+    //         return;
         
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
+    //     Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
 
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
+    //     if (selection.Length == 0) {
+    //         // EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
+    //         return;
+    //     }
 
-        int exportedObjects = 0;
+    //     int exportedObjects = 0;
 
-        ArrayList mfList = new ArrayList();
+    //     ArrayList mfList = new ArrayList();
 
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
+    //     for (int i = 0; i < selection.Length; i++) {
+    //         Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
 
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                mfList.Add(meshfilter[m]);
-            }
-        }
+    //         for (int m = 0; m < meshfilter.Length; m++) {
+    //             exportedObjects++;
+    //             mfList.Add(meshfilter[m]);
+    //         }
+    //     }
 
-        if (exportedObjects > 0) {
-            MeshFilter[] mf = new MeshFilter[mfList.Count];
+    //     if (exportedObjects > 0) {
+    //         MeshFilter[] mf = new MeshFilter[mfList.Count];
 
-            for (int i = 0; i < mfList.Count; i++) {
-                mf[i] = (MeshFilter)mfList[i];
-            }
+    //         for (int i = 0; i < mfList.Count; i++) {
+    //             mf[i] = (MeshFilter)mfList[i];
+    //         }
 
-            string filename = EditorApplication.currentScene + "_" + exportedObjects;
+    //         string filename = EditorApplication.currentScene + "_" + exportedObjects;
 
-            int stripIndex = filename.LastIndexOf('/');//FIXME: Should be Path.PathSeparator
+    //         int stripIndex = filename.LastIndexOf('/');//FIXME: Should be Path.PathSeparator
 
-            if (stripIndex >= 0)
-                filename = filename.Substring(stripIndex + 1).Trim();
+    //         if (stripIndex >= 0)
+    //             filename = filename.Substring(stripIndex + 1).Trim();
 
-            MeshesToFile(mf, targetFolder, filename);
-
-
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects to " + filename, "");
-        } else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
+    //         MeshesToFile(mf, targetFolder, filename);
 
 
+    //         // EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects to " + filename, "");
+    //     } else
+    //         selection = selection;
+    //         // EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
+    // }
+// 
+// 
+// 
+ //   [MenuItem("Custom/Export/Export each selected to single OBJ")]
+    // static void ExportEachSelectionToSingle() {
+    //     if (!CreateTargetFolder())
+    //         return;
 
-    [MenuItem("Custom/Export/Export each selected to single OBJ")]
-    static void ExportEachSelectionToSingle() {
-        if (!CreateTargetFolder())
-            return;
+    //     // var childSimObjects = Resources.FindObjectsOfTypeAll(typeof(SimObjPhysics));
+    //     Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
 
-        // var childSimObjects = Resources.FindObjectsOfTypeAll(typeof(SimObjPhysics));
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
+    //     if (selection.Length == 0) {
+    //         // EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
+    //         return;
+    //     }
 
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
-
-        int exportedObjects = 0;
-
-
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
-
-            MeshFilter[] mf = new MeshFilter[meshfilter.Length];
-
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                mf[m] = (MeshFilter)meshfilter[m];
-            }
-
-            MeshesToFile(mf, targetFolder, selection[i].name + "_" + i);
-        }
-
-        if (exportedObjects > 0) {
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
-        } else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
+    //     int exportedObjects = 0;
 
 
+    //     for (int i = 0; i < selection.Length; i++) {
+    //         Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
+
+    //         MeshFilter[] mf = new MeshFilter[meshfilter.Length];
+
+    //         for (int m = 0; m < meshfilter.Length; m++) {
+    //             exportedObjects++;
+    //             mf[m] = (MeshFilter)meshfilter[m];
+    //         }
+
+    //         MeshesToFile(mf, targetFolder, selection[i].name + "_" + i);
+    //     }
+
+    //     // if (exportedObjects > 0) {
+    //     //     EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
+    //     // } else
+    //     //     EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
+    // }
+// 
 
 
-    [MenuItem("Custom/Export/ExportObject each object to single OBJ")]
+
+   // [MenuItem("Custom/Export/ExportObject each object to single OBJ")]
     public static void ExportEachObectToSingle() {
         if (!CreateTargetFolder())
             return;
@@ -400,6 +403,9 @@ public class EditorObjExporter : ScriptableObject {
             for (int m = 0; m < meshfilter.Length; m++) {
                 exportedObjects++;
                 mf[m] = (MeshFilter)meshfilter[m];
+            }
+            if (gameobject.transform.name.Contains("Television")){
+                i = i;
             }
 
             MeshesToFile(mf, targetFolder, gameobject.transform.name);
