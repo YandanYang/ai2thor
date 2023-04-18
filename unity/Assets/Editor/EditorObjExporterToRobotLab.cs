@@ -14,6 +14,18 @@ using System.Text;
 using System;
 using System.Drawing;
 
+
+struct ObjMaterial {
+    public string name;
+    public string textureName;
+    public string NormalMapName;
+    public double color_red;
+    public double color_green;
+    public double color_blue;
+    public double transparent;
+
+}
+
 public class EditorObjExporterToRobotLab : ScriptableObject {
     private static int vertexOffset = 0;
     private static int normalOffset = 0;
