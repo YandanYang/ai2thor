@@ -504,7 +504,14 @@ namespace UnityStandardAssets.Characters.FirstPerson {
                             throw new InvalidOperationException(
                                 "In " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name +
                                 ", position " + newPosition.ToString() +
-                                " can be reached via capsule cast but is beyond the scene bounds."
+                                " can be reached via capsule cast but is beyond the scene bounds." 
+                                + "  **start point: "+startPosition.ToString() 
+                                + "  **gridSize.Value: "+gridSize.Value.ToString() 
+                                + "  **gridMultiplier: "+gridMultiplier.ToString() 
+                                + "  **newRightForward.Item1: "+newRightForward.Item1.ToString() 
+                                + "  **newRightForward.Item2: "+newRightForward.Item2.ToString() 
+                                + "  **right: "+right.ToString() 
+                                + "  **forward: "+forward.ToString() 
                             );
                         }
 
