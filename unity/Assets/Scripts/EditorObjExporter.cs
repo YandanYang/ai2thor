@@ -34,9 +34,24 @@ public class EditorObjExporter : ScriptableObject {
     //the reader.
     private static string targetFolder = "ExportedObj";
 
+    public static Texture2D TextureToTexture2D(Texture texture)
+    {
+        Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 32);
+        Graphics.Blit(texture, renderTexture);
+    
+        RenderTexture.active = renderTexture;
+        texture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2D.Apply();
+    
+        RenderTexture.active = currentRT;
+        RenderTexture.ReleaseTemporary(renderTexture);
+        return texture2D;
+    }
 
 // 调用方法：FindFile(@"G:\xq\", "test.txt");
-    private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList) {
+    private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList,String folder, String filename) {
         Mesh m = mf.sharedMesh;
         Material[] mats = mf.GetComponent<Renderer>().sharedMaterials;
         var debug = mf.GetComponent<Renderer>();
@@ -44,6 +59,11 @@ public class EditorObjExporter : ScriptableObject {
         StringBuilder sb = new StringBuilder();
         
         sb.Append("g ").Append(mf.name).Append("\n");
+        if (m.name.Contains("cellphone_4"))
+        {
+            sb = sb;
+        }
+        // Debug.Log("dddddddddddddddddd " + m.name);
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
 
@@ -53,6 +73,7 @@ public class EditorObjExporter : ScriptableObject {
             // sb.Append(string.Format("v {0} {2} {1}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
+        // Debug.Log("dddddddddddddddddd 1");
 
         foreach (Vector3 lv in m.normals) {
             Vector3 wv = mf.transform.TransformDirection(lv);
@@ -61,21 +82,31 @@ public class EditorObjExporter : ScriptableObject {
             sb.Append(string.Format("vn {0} {1} {2}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
-
+        // Debug.Log("dddddddddddddddddd 2");
         foreach (Vector3 v in m.uv) {
             sb.Append(string.Format("vt {0} {1}\n", v.x, v.y));
         }
+        // Debug.Log("dddddddddddddddddd 3");
 
         for (int material = 0; material < m.subMeshCount; material++) {
+            // Debug.Log("dddddddddddddddddd 4 " + material);
+            if (mats[material]==null){
+                continue;
+            }
             if (mats[material].name.Contains("Placeable_Surface_Mat")) {
+                    // Debug.Log("dddddddddddddddddd 4 " + material +" x");
                     continue;
                 }
             sb.Append("\n");
+            
             sb.Append("usemtl ").Append(mats[material].name).Append("\n");
+            // Debug.Log("dddddddddddddddddd 4 " + material +" z");
             sb.Append("usemap ").Append(mats[material].name).Append("\n");
+            // Debug.Log("dddddddddddddddddd 4 " + material +" y");
 
             //See if this material is already in the materiallist.
             try {
+                // Debug.Log("dddddddddddddddddd 4 " + material +" a");
                 ObjMaterial objMaterial = new ObjMaterial();
 
                 objMaterial.name = mats[material].name;
@@ -83,9 +114,38 @@ public class EditorObjExporter : ScriptableObject {
                 if  (flag){
 
                     if (mats[material].mainTexture){
+                        // Debug.Log("dddddddddddddddddd 4 " + material +" b");
                         string[] filepath = Directory.GetFiles(targetFolder+"/material/",mats[material].mainTexture.name +".*");
-                        Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
+                        // Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
                         objMaterial.textureName = filepath[0].Replace("\\","/");
+                        Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);
+                        Texture2D tex2D = TextureToTexture2D(mats[material].mainTexture);
+                        // Debug.Log("dddddddddddddddddd 4 " + material +" c");
+                        for (int i = 0;i<result.height;i++){
+                            for (int j = 0;j<result.width;j++){
+                                Color newColor = tex2D.GetPixelBilinear((float)j/(float)result.width,(float)i/(float)result.height);
+                                newColor.r = newColor.r * mats[material].color.r;
+                                newColor.g = newColor.g * mats[material].color.g;
+                                newColor.b = newColor.b * mats[material].color.b;
+                                result.SetPixel(j,i,newColor);
+                            }
+                        }
+                        result.Apply();
+                        // Debug.Log("dddddddddddddddddd 4 " + material +" d");
+                        string destinationFile = objMaterial.textureName;
+                        int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
+
+                        if (stripIndex >= 0)
+                            destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
+
+
+                        // destinationFile = destinationFile.Replace(".tif",".png");
+                        string relativeFile = destinationFile;
+
+                        destinationFile = folder + "/" + filename.Replace("|", "_") + "_" + destinationFile;
+                        // Debug.Log("dddddddddddddddddd 4 " + material +" e");
+                        File.WriteAllBytes(destinationFile,result.EncodeToJPG());
+                        // Debug.Log("dddddddddddddddddd 4 " + material +" f");
                         // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
                     //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
                         // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
@@ -96,7 +156,7 @@ public class EditorObjExporter : ScriptableObject {
                 else{
                     material = material;
                 }
-                
+                // Debug.Log("dddddddddddddddddd 4 " + material +" g");
                 flag = mats[material].HasProperty("_Color");
                 if  (flag){
                     objMaterial.color_red = mats[material].color.r;
@@ -124,7 +184,7 @@ public class EditorObjExporter : ScriptableObject {
                     triangles[i] + 1 + vertexOffset, triangles[i + 1] + 1 + vertexOffset, triangles[i + 2] + 1 + vertexOffset));
             }
         }
-
+        // Debug.Log("dddddddddddddddddd 5");
         vertexOffset += m.vertices.Length;
         normalOffset += m.normals.Length;
         uvOffset += m.uv.Length;
@@ -176,23 +236,28 @@ public class EditorObjExporter : ScriptableObject {
 
 
                     // destinationFile = destinationFile.Replace(".tif",".png");
+                    destinationFile = filename.Replace("|", "_") + "_" + destinationFile;
                     string relativeFile = destinationFile;
 
-                    destinationFile = folder + "/" + destinationFile;
+                    destinationFile = folder + "/" +  destinationFile;
 
                     Debug.Log("Copying texture from " + kvp.Value.textureName + " to " + destinationFile);
 
-                    try {
-                        //Copy the source file
-                        // if (kvp.Value.textureName.EndsWith(".tif")){
-                        //     destinationFile = destinationFile.Replace(".tif",".png");
-                            // string newfilename = kvp.Value.textureName.Replace(".tif",".png");
-                            // System.Drawing.Bitmap.FromFile(kvp.Value.textureName).Save(newfilename, System.Drawing.Imaging.ImageFormat.Png);
-                        // }
-                        File.Copy(kvp.Value.textureName, destinationFile);
-                    } catch {
+                    // try {
+                    //     // byte[] imageBytes = File.ReadAllBytes(kvp.Value.textureName);
+                    //     // Texture2D tex = new Texture2D(2,2);
+                    //     // tex.LoadImage(imageBytes);
+                    //     // File.WriteAllBytes(destinationFile,imageBytes);
+                    //     //Copy the source file
+                    //     // if (kvp.Value.textureName.EndsWith(".tif")){
+                    //     //     destinationFile = destinationFile.Replace(".tif",".png");
+                    //         // string newfilename = kvp.Value.textureName.Replace(".tif",".png");
+                    //         // System.Drawing.Bitmap.FromFile(kvp.Value.textureName).Save(newfilename, System.Drawing.Imaging.ImageFormat.Png);
+                    //     // }
+                    //     File.Copy(kvp.Value.textureName, destinationFile);
+                    // } catch {
 
-                    }
+                    // }
 
 
                     sw.Write("map_Kd {0}", relativeFile);
@@ -209,7 +274,7 @@ public class EditorObjExporter : ScriptableObject {
         using (StreamWriter sw = new StreamWriter(folder + "/" + filename.Replace("|", "_") + ".obj")) {
             sw.Write("mtllib ./" + filename.Replace("|", "_") + ".mtl\n");
 
-            sw.Write(MeshToString(mf, materialList));
+            sw.Write(MeshToString(mf, materialList, folder, filename));
         }
 
         MaterialsToFile(materialList, folder, filename.Replace("|", "_"));
@@ -223,7 +288,7 @@ public class EditorObjExporter : ScriptableObject {
             sw.Write("mtllib ./" + filename.Replace("|", "_") + ".mtl\n");
 
             for (int i = 0; i < mf.Length; i++) {
-                sw.Write(MeshToString(mf[i], materialList));
+                sw.Write(MeshToString(mf[i], materialList, folder, filename));
             }
         }
 
@@ -242,7 +307,8 @@ public class EditorObjExporter : ScriptableObject {
     }
 
 
-    public static void ExportEachObectToSingle(String subFolder) {
+    public static void ExportEachObectToSingle(int index = 0) {  //String subFolder
+        String subFolder = "House_" + index.ToString();
         if (!CreateTargetFolder(subFolder))
             return;
         ExportEachObjectToSingle("Walls",subFolder);
@@ -267,7 +333,17 @@ public class EditorObjExporter : ScriptableObject {
 
 
         for (int i = 0; i < objects.Length; i++) {
+            Debug.Log(i.ToString());
+            // if (i==136){
+            //     i = i;
+            // }
+            // if (i==177){
+            //     i = i;
+            // }
             var gameobject = objects[i];
+            if (gameobject.transform.name.Contains("CD|surface")){
+                continue;
+            }
             if (!gameobject.transform.parent.name.Equals(parentType)){
                 continue;
             }
@@ -287,6 +363,9 @@ public class EditorObjExporter : ScriptableObject {
                 i = i;
             }
             string path = targetFolder+"/"+subFolder;
+            // if (i<177){
+            //     continue;
+            // }
 
             MeshesToFile(mf, targetFolder+"/"+subFolder, gameobject.transform.name);
         }

@@ -397,6 +397,7 @@ class Controller(object):
         platform=None,
         server_timeout: Optional[float] = 100.0,
         server_start_timeout: float = 300.0,
+        index = 0,
         **unity_initialization_parameters,
     ):
         self.receptacle_nearest_pivot_points = {}
@@ -589,7 +590,7 @@ class Controller(object):
                     else:
                         # perhaps only using RoboTHOR or using only custom scenes
                         scene = sorted(list(scenes_in_build))[0]
-
+            scene["dataset_index"] = index 
             event = self.reset(scene)
 
             # older builds don't send actionReturn on Initialize

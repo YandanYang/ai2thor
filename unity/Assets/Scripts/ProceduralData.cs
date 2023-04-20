@@ -374,6 +374,7 @@ namespace Thor.Procedural.Data {
     public class ProceduralHouse {
         public ProceduralParameters proceduralParameters { get; set; }
         public string id { get; set; }
+        public int dataset_index { get; set; }
         public List<RoomHierarchy> rooms { get; set; } = new List<RoomHierarchy>();
         public List<PolygonWall> walls { get; set; } = new List<PolygonWall>();
         public List<Door> doors { get; set; } = new List<Door>();
