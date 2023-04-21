@@ -67,10 +67,10 @@ public class EditorObjExporter : ScriptableObject {
         }
         sb.Append("g ").Append(mf.name).Append("\n");
         Debug.Log("dddddddddddddddddd 55555");
-        // if (m.name.Contains("cellphone_4"))
-        // {
-        //     sb = sb;
-        // }
+        if (m.name.Contains("Statue"))
+        {
+            sb = sb;
+        }
         Debug.Log("dddddddddddddddddd " + m.name);
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
@@ -320,7 +320,7 @@ public class EditorObjExporter : ScriptableObject {
         return true;
     }
 
-
+    // [MenuItem("Custom/Export/ExportObject_Z each object to single OBJ")]
     public static void ExportEachObectToSingle(int index = 0) {  //String subFolder
         String subFolder = "House_" + index.ToString();
         if (!CreateTargetFolder(subFolder))
@@ -348,9 +348,9 @@ public class EditorObjExporter : ScriptableObject {
 
         for (int i = 0; i < objects.Length; i++) {
             Debug.Log(i.ToString());
-            // if (i==19){
-            //     i = i;
-            // }
+            if (i==53){
+                i = i;
+            }
             // if (i==177){
             //     i = i;
             // }
@@ -377,7 +377,7 @@ public class EditorObjExporter : ScriptableObject {
                 i = i;
             }
             string path = targetFolder+"/"+subFolder;
-            // if (i!=19){
+            // if (i!=53){
             //     continue;
             // }
 

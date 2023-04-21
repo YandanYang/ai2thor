@@ -6036,7 +6036,25 @@ namespace UnityStandardAssets.Characters.FirstPerson {
                 return;
             }
             actionFinished(true);
+            
         }
+
+        public void SaveHouseToObj(int dataset_index=0) {
+            
+            try {
+                EditorObjExporter.ExportEachObectToSingle(dataset_index);
+            } 
+            catch (Exception e) {
+                Debug.Log(e);
+                var msg = $"Exception saving house.\n'{e.Message}'\n'{e.InnerException}'";
+                Debug.Log(msg);
+                actionFinished(false, actionReturn: null, errorMessage: msg);
+                return;
+            }
+            actionFinished(true);
+            
+        }
+        
 
         public void GetHouseFromTemplate(HouseTemplate template) {
             var rooms = template.rooms.Select(room => room.Value);
