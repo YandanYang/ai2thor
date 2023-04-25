@@ -13,8 +13,6 @@ using System.IO;
 using System.Text;
 using System;
 using System.Drawing;
-
-
 struct ObjMaterial {
     public string name;
     public string textureName;
@@ -26,7 +24,7 @@ struct ObjMaterial {
 
 }
 
-public class EditorObjExporterToRobotLab : ScriptableObject {
+public class EditorObjExporter : ScriptableObject {
     private static int vertexOffset = 0;
     private static int normalOffset = 0;
     private static int uvOffset = 0;
@@ -36,15 +34,38 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
     //the reader.
     private static string targetFolder = "ExportedObj";
 
+    public static Texture2D TextureToTexture2D(Texture texture)
+    {
+        Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 32);
+        Graphics.Blit(texture, renderTexture);
+    
+        RenderTexture.active = renderTexture;
+        texture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2D.Apply();
+    
+        RenderTexture.active = currentRT;
+        RenderTexture.ReleaseTemporary(renderTexture);
+        return texture2D;
+    }
 
-    private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList) {
+// 调用方法：FindFile(@"G:\xq\", "test.txt");
+    private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList,String folder, String filename) {
         Mesh m = mf.sharedMesh;
+        
         Material[] mats = mf.GetComponent<Renderer>().sharedMaterials;
         var debug = mf.GetComponent<Renderer>();
 
         StringBuilder sb = new StringBuilder();
-
+        if (m==null){
+            return sb.ToString();
+        }
         sb.Append("g ").Append(mf.name).Append("\n");
+        if (m.name.Contains("Statue"))
+        {
+            sb = sb;
+        }
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
 
@@ -62,16 +83,19 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
             // sb.Append(string.Format("vn {0} {1} {2}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
-
         foreach (Vector3 v in m.uv) {
             sb.Append(string.Format("vt {0} {1}\n", v.x, v.y));
         }
 
         for (int material = 0; material < m.subMeshCount; material++) {
+            if (mats[material]==null){
+                continue;
+            }
             if (mats[material].name.Contains("Placeable_Surface_Mat")) {
                     continue;
                 }
             sb.Append("\n");
+            
             sb.Append("usemtl ").Append(mats[material].name).Append("\n");
             sb.Append("usemap ").Append(mats[material].name).Append("\n");
 
@@ -80,20 +104,66 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
                 ObjMaterial objMaterial = new ObjMaterial();
 
                 objMaterial.name = mats[material].name;
+                var flag = mats[material].HasProperty("_MainTex");
+                if  (flag){
 
-                if (mats[material].mainTexture)
-                    objMaterial.textureName = EditorUtility.GetAssetPath(mats[material].mainTexture);
-                else
+                    if (mats[material].mainTexture){
+                        string[] filepath = Directory.GetFiles(targetFolder+"/material/",mats[material].mainTexture.name +".*");
+                        Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
+                        objMaterial.textureName = filepath[0].Replace("\\","/");
+                        Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);
+                        Texture2D tex2D = TextureToTexture2D(mats[material].mainTexture);
+                        for (int i = 0;i<result.height;i++){
+                            for (int j = 0;j<result.width;j++){
+                                Color newColor = tex2D.GetPixelBilinear((float)j/(float)result.width,(float)i/(float)result.height);
+                                newColor.r = newColor.r * mats[material].color.r;
+                                newColor.g = newColor.g * mats[material].color.g;
+                                newColor.b = newColor.b * mats[material].color.b;
+                                result.SetPixel(j,i,newColor);
+                            }
+                        }
+                        result.Apply();
+                        string destinationFile = objMaterial.textureName;
+                        int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
+
+                        if (stripIndex >= 0)
+                            destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
+
+
+                        destinationFile = destinationFile.Replace(".tif",".png");
+                        destinationFile = destinationFile.Replace(".jpg",".png");
+                        destinationFile = destinationFile.Replace(".JPG",".png");
+                        destinationFile = destinationFile.Replace(".tga",".png");
+                        string relativeFile = destinationFile;
+
+                        destinationFile = folder + "/" + filename.Replace("|", "_") + "_" + destinationFile;
+                        File.WriteAllBytes(destinationFile,result.EncodeToPNG());
+                        // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
+                    //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
+                        // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
+                    }
+                    else
                     objMaterial.textureName = null;
-                objMaterial.color_red = mats[material].color.r;
-                objMaterial.color_green = mats[material].color.g;
-                objMaterial.color_blue = mats[material].color.b;
-                objMaterial.color_blue = mats[material].color.b;
-                objMaterial.transparent = mats[material].color.a;
+                }
+                else{
+                    material = material;
+                }
+                flag = mats[material].HasProperty("_Color");
+                if  (flag){
+                    objMaterial.color_red = mats[material].color.r;
+                    objMaterial.color_green = mats[material].color.g;
+                    objMaterial.color_blue = mats[material].color.b;
+                    objMaterial.transparent = mats[material].color.a;
+                }
+                else {
+                    material = material;
+                }
                 //objMaterial.NormalMapName = null;
 
                 materialList.Add(objMaterial.name, objMaterial);
+                material = material;
             } catch (ArgumentException) {
+                material = material;
                 //Already in the dictionary
             }
 
@@ -105,7 +175,6 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
                     triangles[i] + 1 + vertexOffset, triangles[i + 1] + 1 + vertexOffset, triangles[i + 2] + 1 + vertexOffset));
             }
         }
-
         vertexOffset += m.vertices.Length;
         normalOffset += m.normals.Length;
         uvOffset += m.uv.Length;
@@ -157,23 +226,32 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
 
 
                     // destinationFile = destinationFile.Replace(".tif",".png");
+                    destinationFile = filename.Replace("|", "_") + "_" + destinationFile;
+                    destinationFile = destinationFile.Replace(".tif",".png");
+                    destinationFile = destinationFile.Replace(".jpg",".png");
+                    destinationFile = destinationFile.Replace(".JPG",".png");
+                    destinationFile = destinationFile.Replace(".tga",".png");
                     string relativeFile = destinationFile;
 
-                    destinationFile = folder + "/" + destinationFile;
+                    destinationFile = folder + "/" +  destinationFile;
 
                     Debug.Log("Copying texture from " + kvp.Value.textureName + " to " + destinationFile);
 
-                    try {
-                        //Copy the source file
-                        // if (kvp.Value.textureName.EndsWith(".tif")){
-                        //     destinationFile = destinationFile.Replace(".tif",".png");
-                            // string newfilename = kvp.Value.textureName.Replace(".tif",".png");
-                            // System.Drawing.Bitmap.FromFile(kvp.Value.textureName).Save(newfilename, System.Drawing.Imaging.ImageFormat.Png);
-                        // }
-                        File.Copy(kvp.Value.textureName, destinationFile);
-                    } catch {
+                    // try {
+                    //     // byte[] imageBytes = File.ReadAllBytes(kvp.Value.textureName);
+                    //     // Texture2D tex = new Texture2D(2,2);
+                    //     // tex.LoadImage(imageBytes);
+                    //     // File.WriteAllBytes(destinationFile,imageBytes);
+                    //     //Copy the source file
+                    //     // if (kvp.Value.textureName.EndsWith(".tif")){
+                    //     //     destinationFile = destinationFile.Replace(".tif",".png");
+                    //         // string newfilename = kvp.Value.textureName.Replace(".tif",".png");
+                    //         // System.Drawing.Bitmap.FromFile(kvp.Value.textureName).Save(newfilename, System.Drawing.Imaging.ImageFormat.Png);
+                    //     // }
+                    //     File.Copy(kvp.Value.textureName, destinationFile);
+                    // } catch {
 
-                    }
+                    // }
 
 
                     sw.Write("map_Kd {0}", relativeFile);
@@ -190,7 +268,7 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
         using (StreamWriter sw = new StreamWriter(folder + "/" + filename.Replace("|", "_") + ".obj")) {
             sw.Write("mtllib ./" + filename.Replace("|", "_") + ".mtl\n");
 
-            sw.Write(MeshToString(mf, materialList));
+            sw.Write(MeshToString(mf, materialList, folder, filename));
         }
 
         MaterialsToFile(materialList, folder, filename.Replace("|", "_"));
@@ -204,153 +282,38 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
             sw.Write("mtllib ./" + filename.Replace("|", "_") + ".mtl\n");
 
             for (int i = 0; i < mf.Length; i++) {
-                sw.Write(MeshToString(mf[i], materialList));
+                sw.Write(MeshToString(mf[i], materialList, folder, filename));
             }
         }
 
         MaterialsToFile(materialList, folder, filename.Replace("|", "_"));
     }
 
-    private static bool CreateTargetFolder() {
+    private static bool CreateTargetFolder(String subFolder) {
         try {
-            System.IO.Directory.CreateDirectory(targetFolder);
+            System.IO.Directory.CreateDirectory(targetFolder+"/"+subFolder);
         } catch {
-            EditorUtility.DisplayDialog("Error!", "Failed to create target folder!", "");
+            // EditorUtility.DisplayDialog("Error!", "Failed to create target folder!", "");
             return false;
         }
 
         return true;
     }
 
-    [MenuItem("Custom/Export/Export_Z all MeshFilters in selection to separate OBJs")]
-    static void ExportSelectionToSeparate() {
-        if (!CreateTargetFolder())
-            return;
-
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
-
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
-
-        int exportedObjects = 0;
-
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
-
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                MeshToFile((MeshFilter)meshfilter[m], targetFolder, selection[i].name + "_" + i + "_" + m);
-            }
-        }
-
-        if (exportedObjects > 0)
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
-        else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
-
-    [MenuItem("Custom/Export/Export_Z whole selection to single OBJ")]
-    static void ExportWholeSelectionToSingle() {
-        if (!CreateTargetFolder())
-            return;
-        
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
-
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
-
-        int exportedObjects = 0;
-
-        ArrayList mfList = new ArrayList();
-
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
-
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                mfList.Add(meshfilter[m]);
-            }
-        }
-
-        if (exportedObjects > 0) {
-            MeshFilter[] mf = new MeshFilter[mfList.Count];
-
-            for (int i = 0; i < mfList.Count; i++) {
-                mf[i] = (MeshFilter)mfList[i];
-            }
-
-            string filename = EditorApplication.currentScene + "_" + exportedObjects;
-
-            int stripIndex = filename.LastIndexOf('/');//FIXME: Should be Path.PathSeparator
-
-            if (stripIndex >= 0)
-                filename = filename.Substring(stripIndex + 1).Trim();
-
-            MeshesToFile(mf, targetFolder, filename);
-
-
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects to " + filename, "");
-        } else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
-
-
-
-    [MenuItem("Custom/Export/Export_Z each selected to single OBJ")]
-    static void ExportEachSelectionToSingle() {
-        if (!CreateTargetFolder())
-            return;
-
-        // var childSimObjects = Resources.FindObjectsOfTypeAll(typeof(SimObjPhysics));
-        Transform[] selection = Selection.GetTransforms(SelectionMode.Editable | SelectionMode.ExcludePrefab);
-
-        if (selection.Length == 0) {
-            EditorUtility.DisplayDialog("No source object selected!", "Please select one or more target objects", "");
-            return;
-        }
-
-        int exportedObjects = 0;
-
-
-        for (int i = 0; i < selection.Length; i++) {
-            Component[] meshfilter = selection[i].GetComponentsInChildren(typeof(MeshFilter));
-
-            MeshFilter[] mf = new MeshFilter[meshfilter.Length];
-
-            for (int m = 0; m < meshfilter.Length; m++) {
-                exportedObjects++;
-                mf[m] = (MeshFilter)meshfilter[m];
-            }
-
-            MeshesToFile(mf, targetFolder, selection[i].name + "_" + i);
-        }
-
-        if (exportedObjects > 0) {
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " objects", "");
-        } else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
-    }
-
-
-
-
     [MenuItem("Custom/Export/ExportObject_Z each object to single OBJ")]
-    static void ExportEachObectToSingle() {
-        if (!CreateTargetFolder())
+    public static void ExportEachObectToSingle() {  //String subFolder
+        String subFolder = "debug";
+        if (!CreateTargetFolder(subFolder))
             return;
-        ExportEachObjectToSingle("Walls");
-        ExportEachObjectToSingle("Objects");
-        ExportEachObjectToSingle("Ceiling");
-        ExportEachObjectToSingle("Floor");
+        ExportEachObjectToSingle("Walls",subFolder);
+        ExportEachObjectToSingle("Objects",subFolder);
+        ExportEachObjectToSingle("Ceiling",subFolder);
+        ExportEachObjectToSingle("Floor",subFolder);
     }
     
     
-    static void ExportEachObjectToSingle(String parentType ) {
-        if (!CreateTargetFolder())
+    static void ExportEachObjectToSingle(String parentType, String subFolder) {
+        if (!CreateTargetFolder(subFolder))
             return;
         MonoBehaviour[] objects = null;
         if (parentType.Equals("Ceiling")){
@@ -360,16 +323,21 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
             objects = GameObject.Find(parentType).GetComponentsInChildren<SimObjPhysics>();
         }
 
-        if (objects.Length == 0) {
-            EditorUtility.DisplayDialog("No source object available!","","");
-            return;
-        }
-
         int exportedObjects = 0;
 
 
         for (int i = 0; i < objects.Length; i++) {
+            Debug.Log(i.ToString());
+            // if (i==53){
+            //     i = i;
+            // }
+            // if (i==177){
+            //     i = i;
+            // }
             var gameobject = objects[i];
+            if (gameobject.transform.name.Contains("CD|surface")){
+                continue;
+            }
             if (!gameobject.transform.parent.name.Equals(parentType)){
                 continue;
             }
@@ -385,14 +353,21 @@ public class EditorObjExporterToRobotLab : ScriptableObject {
                 exportedObjects++;
                 mf[m] = (MeshFilter)meshfilter[m];
             }
+            if (gameobject.transform.name.Contains("Television")){
+                i = i;
+            }
+            string path = targetFolder+"/"+subFolder;
+            // if (i!=53){
+            //     continue;
+            // }
 
-            MeshesToFile(mf, targetFolder, gameobject.transform.name);
+            MeshesToFile(mf, targetFolder+"/"+subFolder, gameobject.transform.name);
         }
 
-        if (exportedObjects > 0) {
-            EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " .obj files of "+ parentType, "");
-        } else
-            EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
+        // if (exportedObjects > 0) {
+        //     EditorUtility.DisplayDialog("Objects exported", "Exported " + exportedObjects + " .obj files of "+ parentType, "");
+        // } else
+        //     EditorUtility.DisplayDialog("Objects not exported", "Make sure at least some of your selected objects have mesh filters!", "");
     }
     
 }

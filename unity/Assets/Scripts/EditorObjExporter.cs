@@ -102,19 +102,15 @@ public class EditorObjExporter : ScriptableObject {
                 continue;
             }
             if (mats[material].name.Contains("Placeable_Surface_Mat")) {
-                    Debug.Log("dddddddddddddddddd 4 " + material +" x");
                     continue;
                 }
             sb.Append("\n");
             
             sb.Append("usemtl ").Append(mats[material].name).Append("\n");
-            Debug.Log("dddddddddddddddddd 4 " + material +" z");
             sb.Append("usemap ").Append(mats[material].name).Append("\n");
-            Debug.Log("dddddddddddddddddd 4 " + material +" y");
 
             //See if this material is already in the materiallist.
             try {
-                Debug.Log("dddddddddddddddddd 4 " + material +" a");
                 ObjMaterial objMaterial = new ObjMaterial();
 
                 objMaterial.name = mats[material].name;
@@ -122,13 +118,11 @@ public class EditorObjExporter : ScriptableObject {
                 if  (flag){
 
                     if (mats[material].mainTexture){
-                        Debug.Log("dddddddddddddddddd 4 " + material +" b");
                         string[] filepath = Directory.GetFiles(targetFolder+"/material/",mats[material].mainTexture.name +".*");
                         Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
                         objMaterial.textureName = filepath[0].Replace("\\","/");
                         Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);
                         Texture2D tex2D = TextureToTexture2D(mats[material].mainTexture);
-                        Debug.Log("dddddddddddddddddd 4 " + material +" c");
                         for (int i = 0;i<result.height;i++){
                             for (int j = 0;j<result.width;j++){
                                 Color newColor = tex2D.GetPixelBilinear((float)j/(float)result.width,(float)i/(float)result.height);
@@ -139,7 +133,6 @@ public class EditorObjExporter : ScriptableObject {
                             }
                         }
                         result.Apply();
-                        Debug.Log("dddddddddddddddddd 4 " + material +" d");
                         string destinationFile = objMaterial.textureName;
                         int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
 
@@ -147,13 +140,14 @@ public class EditorObjExporter : ScriptableObject {
                             destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
 
 
-                        // destinationFile = destinationFile.Replace(".tif",".png");
+                        destinationFile = destinationFile.Replace(".tif",".png");
+                        destinationFile = destinationFile.Replace(".jpg",".png");
+                        destinationFile = destinationFile.Replace(".JPG",".png");
+                        destinationFile = destinationFile.Replace(".tga",".png");
                         string relativeFile = destinationFile;
 
                         destinationFile = folder + "/" + filename.Replace("|", "_") + "_" + destinationFile;
-                        Debug.Log("dddddddddddddddddd 4 " + material +" e");
-                        File.WriteAllBytes(destinationFile,result.EncodeToJPG());
-                        Debug.Log("dddddddddddddddddd 4 " + material +" f");
+                        File.WriteAllBytes(destinationFile,result.EncodeToPNG());
                         // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
                     //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
                         // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
@@ -164,7 +158,6 @@ public class EditorObjExporter : ScriptableObject {
                 else{
                     material = material;
                 }
-                Debug.Log("dddddddddddddddddd 4 " + material +" g");
                 flag = mats[material].HasProperty("_Color");
                 if  (flag){
                     objMaterial.color_red = mats[material].color.r;
@@ -192,7 +185,6 @@ public class EditorObjExporter : ScriptableObject {
                     triangles[i] + 1 + vertexOffset, triangles[i + 1] + 1 + vertexOffset, triangles[i + 2] + 1 + vertexOffset));
             }
         }
-        Debug.Log("dddddddddddddddddd 5");
         vertexOffset += m.vertices.Length;
         normalOffset += m.normals.Length;
         uvOffset += m.uv.Length;
@@ -243,7 +235,10 @@ public class EditorObjExporter : ScriptableObject {
                         destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
 
 
-                    // destinationFile = destinationFile.Replace(".tif",".png");
+                    destinationFile = destinationFile.Replace(".tif",".png");
+                    destinationFile = destinationFile.Replace(".jpg",".png");
+                    destinationFile = destinationFile.Replace(".JPG",".png");
+                    destinationFile = destinationFile.Replace(".tga",".png");
                     destinationFile = filename.Replace("|", "_") + "_" + destinationFile;
                     string relativeFile = destinationFile;
 
@@ -296,12 +291,6 @@ public class EditorObjExporter : ScriptableObject {
             sw.Write("mtllib ./" + filename.Replace("|", "_") + ".mtl\n");
 
             for (int i = 0; i < mf.Length; i++) {
-                Debug.Log("aaaaaaaa  1 "+folder.ToString());
-                Debug.Log("aaaaaaaa  2 "+i.ToString());
-                Debug.Log("aaaaaaaa  3 "+mf[i].name);
-                
-                Debug.Log("aaaaaaaa  4 "+filename.ToString());
-                Debug.Log("bbbbbbbb");
                 sw.Write(MeshToString(mf[i], materialList, folder, filename));
             }
         }
@@ -348,9 +337,9 @@ public class EditorObjExporter : ScriptableObject {
 
         for (int i = 0; i < objects.Length; i++) {
             Debug.Log(i.ToString());
-            if (i==53){
-                i = i;
-            }
+            // if (i==53){
+            //     i = i;
+            // }
             // if (i==177){
             //     i = i;
             // }

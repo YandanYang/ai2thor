@@ -130,9 +130,12 @@ def SetFrames(controller,path,params):
 def GenerateData(params):
     dataset = prior.load_dataset("procthor-10k")
     datacnt = 10000
-    for i in range(0,datacnt):
+    for i in range(8184,8500):
         print("House_"+str(i)+"/")
         house = dataset["train"][i]
+        with open("House_85.json","w") as f:
+            json.dump(house,f)
+        pdb.set_trace()
         controller = Controller(scene=house,
                                 gridsize=params["gridsize"],
                                 width=params["W"],
