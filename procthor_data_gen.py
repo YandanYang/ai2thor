@@ -127,15 +127,43 @@ def SetFrames(controller,path,params):
 #         info = " ".join(item)+"/n"
 #         f.write(info)
 
+
+def get_top_down_frame(controller):
+    # Setup the top-down camera
+    event = controller.step(action="GetMapViewCameraProperties", raise_for_failure=True)
+    pose = copy.deepcopy(event.metadata["actionReturn"])
+    bounds = event.metadata["sceneBounds"]["size"]
+    max_bound = max(bounds["x"], bounds["z"])
+    pose["fieldOfView"] = 50
+    pose["position"]["y"] += 1.1 * max_bound
+    pose["orthographic"] = False
+    pose["farClippingPlane"] = 50
+    del pose["orthographicSize"]
+    # add the camera to the scene
+    event = controller.step(
+        action="AddThirdPartyCamera",
+        **pose,
+        skyboxColor="white",
+        raise_for_failure=True,
+    )
+    top_down_frame = event.third_party_camera_frames[-1]
+    return Image.fromarray(top_down_frame)
+
+def save_top_down_frame(index,controller):
+    frame = get_top_down_frame(controller)
+    frame.save("top_down_frame/"+str(index)+".png")
+    print("saveing top down frame "+str(index))
+    return 
+
+
 def GenerateData(params):
     dataset = prior.load_dataset("procthor-10k")
     datacnt = 10000
-    for i in range(8184,8500):
+    for i in range(1828,datacnt):
         print("House_"+str(i)+"/")
         house = dataset["train"][i]
-        with open("House_85.json","w") as f:
-            json.dump(house,f)
-        pdb.set_trace()
+       # with open("House_85.json","w") as f:
+       #     json.dump(house,f)
         controller = Controller(scene=house,
                                 gridsize=params["gridsize"],
                                 width=params["W"],
@@ -144,7 +172,8 @@ def GenerateData(params):
                                 renderNormalsImage=params["renderNormalsImage"],
                                 index=i,
                                 local_executable_path = params["local_executable_path"])
-        controller.step(action="SaveHouseToObj",dataset_index=i) 
+        # controller.step(action="SaveHouseToObj",dataset_index=i) 
+        save_top_down_frame(i,controller)
         #transform_json = SetFrames(controller,"gen_data/output/House_"+str(i)+"/",params)
         #with open("gen_data/output/House_"+str(i)+"/" + "transforms.json","w") as f:
         #    json.dump(transform_json,f)
