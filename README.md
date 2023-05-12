@@ -10,7 +10,8 @@
 10k scene provided in Procthor-10k Dataset.
 ```
 
-## Open a procthor scene in Unity Editor
+## Open & export the whole scene in Unity Editor
+### Load scene
 Download Unity-Editor.<br />
 Open folder ai2thor/unity as a Unity project.<br />
 Take the House json and place it in the directory `Assets/Resources/rooms, such as house3.json`.<br />
@@ -19,6 +20,7 @@ While in this scene, hit Play and then navigate your cursor to the text box that
 This box allows actions to be executed directly in the editor without needing to link to the python controller, and all actions are defined in the script `DebugInputField.cs` located in `Assets/Scripts`.<br />
 To start, type `init` into this box to initialize a default agent and press enter to execute. Then, type `chp json file's name>` and hit enter again to generate a house based on the json file you saved to the `Assets/Resources/rooms` directory.
 
+### Export scene into .obj files
 Our modified version **remove robot** in the scene and add a button to **export .obj** files easily.
 
 ![image](https://github.com/YandanYang/ai2thor/blob/main/SaveObj.jpeg)
