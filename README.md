@@ -45,23 +45,25 @@ Each **House_xxx** folder contains the following files of k objects:
 ### Visualize a single house
 Try Meshlab or Blender. Import .obj files and you will see the entire house.
 
-### Relative code
-To build and export 3D model ProcTHOR-10k House, you could run : 
+
+
+## For developer
+###  Installation
+This repository is forked from [AI2-THOR](https://github.com/allenai/ai2thor). Please refer to it for installation.
+
+### Compile executable file for Unity Project 
+Open The project in Unity Editor.
+Compile the project into an executable file and save it into `unity/Build/local-build-procthor.x86_64`.
+
+### Generate 3D Model in batches
+To build and export 3D model for each house in batches, you should first prepare the required environment and run : 
 ```
 python prothor_data_gen.py
 ```
-you can also change the json file in the code to export different house.
+You can also change the json file in the code to export different house.
+<br />
 
-# To develop your own code
-##  Installation
-This repository is forked from [AI2-THOR](https://github.com/allenai/ai2thor). Please refer to it for installation.
 
 ## Official Tutorial
 [This website](https://ai2thor.allenai.org/) shows more details to use procthor with demo and documentation.
 You can go to [Procthor Colab](https://github.com/allenai/) to get started with [ProcTHOR](https://procthor.allenai.org/#explore).
-
-<br />
-
-<a href="//prior.allenai.org">
-<p align="center"><img width="100%" src="https://raw.githubusercontent.com/allenai/ai2thor/main/doc/static/ai2-prior.svg" /></p>
-</a>
