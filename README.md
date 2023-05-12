@@ -1,4 +1,4 @@
-This repository aims to export 3D model of each scene in [ProcTHOR-10k](https://github.com/allenai/procthor-10k)
+### This repository aims to export 3D model in [ProcTHOR-10k](https://github.com/allenai/procthor-10k) into .obj files.
 ## What is Procthor?
 
 [**ProcTHOR**](https://procthor.allenai.org/#explore) uses procedural generation to **sample massively diverse, realistic, interactive, customizable, and performant 3D environments** to train simulated embodied agents. 
