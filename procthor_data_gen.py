@@ -172,10 +172,10 @@ def GenerateData(params):
                                 renderNormalsImage=params["renderNormalsImage"],
                                 index=i,
                                 local_executable_path = params["local_executable_path"])
-        # controller.step(action="SaveHouseToObj",dataset_index=i) 
-        save_top_down_frame(i,controller)
+        controller.step(action="SaveHouseToObj",dataset_index=i) 
+        #save_top_down_frame(i,controller)
         #transform_json = SetFrames(controller,"gen_data/output/House_"+str(i)+"/",params)
-        #with open("gen_data/output/House_"+str(i)+"/" + "transforms.json","w") as f:
+        with open("gen_data/output/House_"+str(i)+"/" + "transforms.json","w") as f:
         #    json.dump(transform_json,f)
         controller.stop()
         
