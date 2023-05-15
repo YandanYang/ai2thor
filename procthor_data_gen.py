@@ -281,7 +281,7 @@ def genFrameLocation(controller):
     path_new = interPolatePath(path)
 
     ##show path
-    visualize_path(reachable_positions,path,path_new)
+    # visualize_path(reachable_positions,path,path_new)
     return path_new
     
 def mkdir(dir_path):

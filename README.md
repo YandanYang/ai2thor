@@ -73,9 +73,13 @@ python prothor_data_gen.py --datatype topdown
 ### Generate MultiView images for each house
 To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
 ```
-python prothor_data_gen.py --datatype multiview
+python prothor_data_gen.py --datatype multiview 
 ```
-
+Then you can use [nerfstudio](https://docs.nerf.studio/en/latest/index.html) to check the 3D reconstruction result from the multiview data. Run
+```
+ns-train nerfacto --data ai2thor/Output/Multiview/3/ --pipeline.model.predict-normals True --viewer.websocket-port 7008
+```
+and you will see 
 ## Official Tutorial
 [This website](https://ai2thor.allenai.org/) shows more details to use procthor with demo and documentation.
 You can go to [Procthor Colab](https://github.com/allenai/) to get started with [ProcTHOR](https://procthor.allenai.org/#explore).
