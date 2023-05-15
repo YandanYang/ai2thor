@@ -23,7 +23,7 @@ To start, type `init` into this box to initialize a default agent and press ente
 ### Export scene into .obj files
 Our modified version **remove robot** in the scene and add a button to **export .obj** files easily.
 
-<img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="100px">
+<img src="https://github.com/YandanYang/ai2thor/blob/main/images/SaveObj.png" width="100px">
 
 ## Procthor-10k 3D Dataset 
 
