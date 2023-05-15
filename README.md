@@ -68,9 +68,7 @@ To generate topdown viewport image for each house in batches, you should first p
 ```
 python prothor_data_gen.py --datatype topdown
 ```
-
 <img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="300px">
-<br />
 
 ### Generate MultiView images for each house
 To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
