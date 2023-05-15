@@ -22,6 +22,10 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='Generate procthor data.')
+
+    parser.add_argument(
+        "--datatype", type=str,  default="3D", help="[\"3D\",\"topdown\",\"multiview\"]"
+    )
     
     parser.add_argument(
         "--W", type=int,  default=500, help="image width."
@@ -44,10 +48,6 @@ def parse_args():
 
     parser.add_argument(
         "--frameCnt", type=int,  default=400, help="frame number to capture in this scene."
-    )
-
-    parser.add_argument(
-        "--datatype", type=str,  default="3D", help="[\"3D\",\"topdown\",\"multiview\"]"
     )
 
     parser.add_argument(

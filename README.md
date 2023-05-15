@@ -58,11 +58,23 @@ Compile the project into an executable file and save it into `unity/Build/local-
 ### Generate 3D Model in batches
 To build and export 3D model for each house in batches, you should first prepare the required environment and run : 
 ```
-python prothor_data_gen.py
+python prothor_data_gen.py --datatype 3D
 ```
 You can also change the json file in the code to export different house.
 <br />
 
+### Generate TopDown images for each house
+To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
+```
+python prothor_data_gen.py --datatype topdown
+```
+<br />
+
+### Generate MultiView images for each house
+To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
+```
+python prothor_data_gen.py --datatype multiview
+```
 
 ## Official Tutorial
 [This website](https://ai2thor.allenai.org/) shows more details to use procthor with demo and documentation.
