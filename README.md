@@ -23,7 +23,7 @@ To start, type `init` into this box to initialize a default agent and press ente
 ### Export scene into .obj files
 Our modified version **remove robot** in the scene and add a button to **export .obj** files easily.
 
-<img src="https://github.com/YandanYang/ai2thor/blob/main/images/SaveObj.png" width="100px">
+<img src="https://github.com/YandanYang/ai2thor/blob/main/images/SaveObj.jpeg" width="300px">
 
 ## Procthor-10k 3D Dataset 
 
@@ -69,7 +69,7 @@ To generate topdown viewport image for each house in batches, you should first p
 python prothor_data_gen.py --datatype topdown
 ```
 
-<img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="100px">
+<img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="300px">
 <br />
 
 ### Generate MultiView images for each house
@@ -83,7 +83,7 @@ ns-train nerfacto --data ai2thor/Output/Multiview/3/ --pipeline.model.predict-no
 ```
 and you will see the result in the websocket viewer:
 
-<img src="https://github.com/YandanYang/ai2thor/blob/main/images/multiview-nerf.png" width="100px">
+<img src="https://github.com/YandanYang/ai2thor/blob/main/images/multiview-nerf.png" width="300px">
 
 ## Official Tutorial
 [This website](https://ai2thor.allenai.org/) shows more details to use procthor with demo and documentation.
