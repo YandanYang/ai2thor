@@ -1469,10 +1469,10 @@ namespace Thor.Procedural {
             // output objects in scene
             // EditorObjExporter.ExportEachObectToSingle(8184);
             
-            var agentManager = GameObject.Find("PhysicsSceneManager").GetComponentInChildren<AgentManager>();
-            agentManager.ResetSceneBounds();
+            //var agentManager = GameObject.Find("PhysicsSceneManager").GetComponentInChildren<AgentManager>();
+           // agentManager.ResetSceneBounds();
 
-            setAgentPose(house: house, agentManager: agentManager);
+            //setAgentPose(house: house, agentManager: agentManager);
 
             return floorGameObject;
         }
