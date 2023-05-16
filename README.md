@@ -10,6 +10,14 @@
 10k scene provided in Procthor-10k Dataset.
 ```
 
+### Usable data for 3D grounding  
+We could catch multi-view data in the following format:
+- RGB
+-  depth
+-  Instance segmentation 
+-  Instance mask
+-  Instance Detection 
+
 ## Open & export the whole scene in Unity Editor
 ### Load scene
 Download Unity-Editor.<br />
