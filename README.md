@@ -68,7 +68,7 @@ pip install matplotlib
 Open The project in Unity Editor.
 Compile the project into an executable file and save it into `unity/Build/local-build-procthor.x86_64`.
 
-### Generate data for each house in batches
+### Generate data for each house
 ####  3D Model
 To build and export 3D model for each house in batches, you should first prepare the required environment and run : 
 ```
