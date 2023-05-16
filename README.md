@@ -89,7 +89,7 @@ To generate multi-view RGB-D image with camera pose for each house, you should f
 ```
 python prothor_data_gen.py --datatype multiview 
 ```
-We can see recheable positions of robot 
+We can see recheable positions of robot and path to collect data
 
 <img src="https://github.com/YandanYang/ai2thor/blob/main/images/reachable_position.png" width="300px">
 
