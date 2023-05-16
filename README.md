@@ -90,7 +90,8 @@ To generate multi-view RGB-D image with camera pose for each house, you should f
 python prothor_data_gen.py --datatype multiview 
 ```
 We can see recheable positions of robot 
-<img src="https://github.com/YandanYang/ai2thor/blob/main/images/reachable_position.png" width="500px">
+
+<img src="https://github.com/YandanYang/ai2thor/blob/main/images/reachable_position.png" width="300px">
 
 Then you can use [nerfstudio](https://docs.nerf.studio/en/latest/index.html) to check the 3D reconstruction result from the multiview data. Run
 ```
