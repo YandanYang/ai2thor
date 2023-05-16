@@ -68,7 +68,8 @@ pip install matplotlib
 Open The project in Unity Editor.
 Compile the project into an executable file and save it into `unity/Build/local-build-procthor.x86_64`.
 
-### Generate 3D Model in batches
+### Generate data for each house in batches
+####  3D Model
 To build and export 3D model for each house in batches, you should first prepare the required environment and run : 
 ```
 python prothor_data_gen.py --datatype 3D
@@ -76,14 +77,14 @@ python prothor_data_gen.py --datatype 3D
 You can also change the json file in the code to export different house.
 <br />
 
-### Generate TopDown images for each house
+#### TopDown images 
 To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
 ```
 python prothor_data_gen.py --datatype topdown
 ```
 <img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="500px">
 
-### Generate MultiView images for each house
+#### MultiView images
 To generate multi-view RGB-D image with camera pose for each house, you should first prepare the required environment and run : 
 ```
 python prothor_data_gen.py --datatype multiview 
