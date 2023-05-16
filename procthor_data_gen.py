@@ -5,9 +5,7 @@ from tqdm import tqdm
 import random
 import math
 from ai2thor.controller import Controller
-from ai2thor.controller import Controller
-import pdb
-import ai2thor_colab
+#import ai2thor_colab
 from PIL import Image
 import numpy as np
 import scipy.linalg as linalg
@@ -24,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='Generate procthor data.')
 
     parser.add_argument(
-        "--datatype", type=str,  default="3D", help="[\"3D\",\"topdown\",\"multiview\"]"
+        "--datatype", type=str,  default="multiview", help="[\"3D\",\"topdown\",\"multiview\"]"
     )
     
     parser.add_argument(
@@ -281,7 +279,7 @@ def genFrameLocation(controller):
     path_new = interPolatePath(path)
 
     ##show path
-    # visualize_path(reachable_positions,path,path_new)
+    visualize_path(reachable_positions,path,path_new)
     return path_new
     
 def mkdir(dir_path):
