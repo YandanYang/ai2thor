@@ -84,13 +84,13 @@ python prothor_data_gen.py --datatype topdown
 <img src="https://github.com/YandanYang/ai2thor/blob/main/images/topdown.png" width="500px">
 
 ### Generate MultiView images for each house
-To generate topdown viewport image for each house in batches, you should first prepare the required environment and run : 
+To generate multi-view RGB-D image with camera pose for each house, you should first prepare the required environment and run : 
 ```
 python prothor_data_gen.py --datatype multiview 
 ```
 Then you can use [nerfstudio](https://docs.nerf.studio/en/latest/index.html) to check the 3D reconstruction result from the multiview data. Run
 ```
-ns-train nerfacto --data ai2thor/Output/Multiview/3/ --pipeline.model.predict-normals True --viewer.websocket-port 7008
+ns-train nerfacto --data ai2thor/Output/Multiview/{house_number}/ --pipeline.model.predict-normals True --viewer.websocket-port 7008
 ```
 and you will see the result in the websocket viewer:
 
