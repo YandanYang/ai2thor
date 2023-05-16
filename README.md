@@ -57,9 +57,9 @@ Try Meshlab or Blender. Import .obj files and you will see the entire house.
 ###  Installation
 This repository is forked from [AI2-THOR](https://github.com/allenai/ai2thor). Please refer to it for installation.
 ```
-conda deactivate 
 conda create --name ai2thor -y python=3.8
 conda activate ai2thor
+python setup.py install
 pip install prior
 pip install scipy
 pip install matplotlib
