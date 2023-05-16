@@ -3,7 +3,7 @@
 
 [**ProcTHOR**](https://procthor.allenai.org/#explore) uses procedural generation to **sample massively diverse, realistic, interactive, customizable, and performant 3D environments** to train simulated embodied agents. 
 
-### Dataset details
+### Dataset diversity
 ```
 18 different Semantic Asset groups and 1633 assets across 108(95) categories.    
 16 different scene specifications to seed the scene generation process.
