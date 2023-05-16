@@ -56,7 +56,14 @@ Try Meshlab or Blender. Import .obj files and you will see the entire house.
 ## For developer
 ###  Installation
 This repository is forked from [AI2-THOR](https://github.com/allenai/ai2thor). Please refer to it for installation.
-
+```
+conda deactivate 
+conda create --name ai2thor -y python=3.8
+conda activate ai2thor
+pip install prior
+pip install scipy
+pip install matplotlib
+```
 ### Compile executable file for Unity Project 
 Open The project in Unity Editor.
 Compile the project into an executable file and save it into `unity/Build/local-build-procthor.x86_64`.
