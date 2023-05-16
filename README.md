@@ -11,7 +11,7 @@
 ```
 
 ### Usable data for 3D grounding  
-We could catch multi-view data in the following format:
+We could catch 3D model and multi-view data in the following format:
 - RGB
 -  depth
 -  Instance segmentation 
