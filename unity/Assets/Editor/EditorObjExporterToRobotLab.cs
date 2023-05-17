@@ -108,7 +108,7 @@ public class EditorObjExporter : ScriptableObject {
                 if  (flag){
 
                     if (mats[material].mainTexture){
-                        string[] filepath = Directory.GetFiles(targetFolder+"/material/",mats[material].mainTexture.name +".*");
+                        string[] filepath = Directory.GetFiles("../ExportedObj/material/",mats[material].mainTexture.name +".*");
                         Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
                         objMaterial.textureName = filepath[0].Replace("\\","/");
                         Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);

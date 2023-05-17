@@ -27,7 +27,7 @@ This box allows actions to be executed directly in the editor without needing to
 To start, type `init` into this box to initialize a default agent and press enter to execute. Then, type `chp json file's name>` and hit enter again to generate a house based on the json file you saved to the `Assets/Resources/rooms` directory.
 
 ### Export scene into .obj files
-Our modified version **remove robot** in the scene and add a button to **export .obj** files easily.
+Our modified version **remove robot** in the scene and add a button to **export .obj** files easily. Files will be exported in `ai2thor/unity/ExportedObj/debug/`
 
 <img src="https://github.com/YandanYang/ai2thor/blob/main/images/SaveObj.jpeg" width="500px">
 
