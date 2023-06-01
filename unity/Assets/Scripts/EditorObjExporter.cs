@@ -16,7 +16,11 @@ using System.Drawing;
 struct ObjMaterial {
     public string name;
     public string textureName;
+    public string textureLoadPath;
+    public string textureSavePath;
     public string NormalMapName;
+    public string NormalMapLoadPath;
+    public string NormalMapSavePath;
     public double color_red;
     public double color_green;
     public double color_blue;
@@ -52,26 +56,20 @@ public class EditorObjExporter : ScriptableObject {
 
 // 调用方法：FindFile(@"G:\xq\", "test.txt");
     private static string MeshToString(MeshFilter mf, Dictionary<string, ObjMaterial> materialList,String folder, String filename) {
-        Debug.Log("dddddddddddddddddd 11111");
         Mesh m = mf.sharedMesh;
         
-        Debug.Log("dddddddddddddddddd 22222");
         Material[] mats = mf.GetComponent<Renderer>().sharedMaterials;
-        Debug.Log("dddddddddddddddddd 33333");
         var debug = mf.GetComponent<Renderer>();
-        Debug.Log("dddddddddddddddddd 44444");
-
+        
         StringBuilder sb = new StringBuilder();
         if (m==null){
             return sb.ToString();
         }
         sb.Append("g ").Append(mf.name).Append("\n");
-        Debug.Log("dddddddddddddddddd 55555");
         if (m.name.Contains("Statue"))
         {
             sb = sb;
         }
-        Debug.Log("dddddddddddddddddd " + m.name);
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
 
@@ -81,7 +79,6 @@ public class EditorObjExporter : ScriptableObject {
             // sb.Append(string.Format("v {0} {2} {1}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
-        Debug.Log("dddddddddddddddddd 1");
 
         foreach (Vector3 lv in m.normals) {
             Vector3 wv = mf.transform.TransformDirection(lv);
@@ -90,23 +87,22 @@ public class EditorObjExporter : ScriptableObject {
             sb.Append(string.Format("vn {0} {1} {2}\n", -wv.x, wv.y, wv.z));
         }
         sb.Append("\n");
-        Debug.Log("dddddddddddddddddd 2");
         foreach (Vector3 v in m.uv) {
             sb.Append(string.Format("vt {0} {1}\n", v.x, v.y));
         }
-        Debug.Log("dddddddddddddddddd 3");
 
         for (int material = 0; material < m.subMeshCount; material++) {
-            Debug.Log("dddddddddddddddddd 4 " + material);
             if (mats[material]==null){
                 continue;
             }
+           
             if (mats[material].name.Contains("Placeable_Surface_Mat")) {
                     continue;
                 }
             sb.Append("\n");
-            
-            sb.Append("usemtl ").Append(mats[material].name).Append("\n");
+            string name = mats[material].name.Replace(" (Instance)", string.Empty);
+            mats[material].name = name;
+            sb.Append("usemtl ").Append(name).Append("\n");
             sb.Append("usemap ").Append(mats[material].name).Append("\n");
 
             //See if this material is already in the materiallist.
@@ -114,13 +110,15 @@ public class EditorObjExporter : ScriptableObject {
                 ObjMaterial objMaterial = new ObjMaterial();
 
                 objMaterial.name = mats[material].name;
+                //maintexture
                 var flag = mats[material].HasProperty("_MainTex");
+                string destinationFile = null;
                 if  (flag){
 
                     if (mats[material].mainTexture){
                         string[] filepath = Directory.GetFiles(targetFolder+"/material/",mats[material].mainTexture.name +".*");
                         Debug.Log(targetFolder+"\\material\\"+mats[material].mainTexture.name );
-                        objMaterial.textureName = filepath[0].Replace("\\","/");
+                        objMaterial.textureLoadPath = filepath[0].Replace("\\","/");
                         Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);
                         Texture2D tex2D = TextureToTexture2D(mats[material].mainTexture);
                         for (int i = 0;i<result.height;i++){
@@ -133,7 +131,7 @@ public class EditorObjExporter : ScriptableObject {
                             }
                         }
                         result.Apply();
-                        string destinationFile = objMaterial.textureName;
+                        destinationFile = objMaterial.textureLoadPath;
                         int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
 
                         if (stripIndex >= 0)
@@ -144,10 +142,14 @@ public class EditorObjExporter : ScriptableObject {
                         destinationFile = destinationFile.Replace(".jpg",".png");
                         destinationFile = destinationFile.Replace(".JPG",".png");
                         destinationFile = destinationFile.Replace(".tga",".png");
-                        string relativeFile = destinationFile;
 
-                        destinationFile = folder + "/" + filename.Replace("|", "_") + "_" + destinationFile;
-                        File.WriteAllBytes(destinationFile,result.EncodeToPNG());
+                        destinationFile = filename.Replace("|", "_") + "_" + destinationFile;
+                        objMaterial.textureName = destinationFile;
+                        objMaterial.textureSavePath = folder + "/" + destinationFile;
+                        File.WriteAllBytes(objMaterial.textureSavePath,result.EncodeToPNG());
+
+
+                        
                         // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
                     //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
                         // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
@@ -155,23 +157,77 @@ public class EditorObjExporter : ScriptableObject {
                     else
                     objMaterial.textureName = null;
                 }
-                else{
-                    material = material;
-                }
-                flag = mats[material].HasProperty("_Color");
+                // normal map
+                flag = mats[material].HasProperty("_BumpMap");
                 if  (flag){
+                    Texture2D normal = (Texture2D)mats[material].GetTexture("_BumpMap");
+                    if (normal){
+                        string[] filepath = Directory.GetFiles(targetFolder+"/material/",normal.name +".*");
+                        Debug.Log(targetFolder+"\\material\\"+normal.name);
+                        objMaterial.NormalMapLoadPath = filepath[0].Replace("\\","/");
+                        
+                        // Texture2D tex2D_n  = normal;
+                        Texture2D result_n = new Texture2D(normal.width,normal.height,TextureFormat.RGB24,false);
+                        byte[] normalData = System.IO.File.ReadAllBytes(objMaterial.NormalMapLoadPath);
+                        result_n.LoadImage(normalData);
+                        
+                        // for (int i = 0;i<result_n.height;i++){
+                        //     for (int j = 0;j<result_n.width;j++){
+                        //         Color newColor = tex2D_n.GetPixelBilinear((float)j/(float)result_n.width,(float)i/(float)result_n.height);
+                        //         result_n.SetPixel(j,i,newColor);
+                        //     }
+                        // }
+                        // result_n.Apply();
+                        // Texture2D result = new Texture2D(mats[material].mainTexture.width,mats[material].mainTexture.height,TextureFormat.RGB24,false);
+                        // Texture2D tex2D = TextureToTexture2D(mats[material].mainTexture);                  
+                        // normal.Apply();       
+                        destinationFile = objMaterial.NormalMapLoadPath;
+                        int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
+
+                        if (stripIndex >= 0)
+                            destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
+
+                        destinationFile = destinationFile.Replace(".tif",".png");
+                        destinationFile = destinationFile.Replace(".jpg",".png");
+                        destinationFile = destinationFile.Replace(".JPG",".png");
+                        destinationFile = destinationFile.Replace(".tga",".png");
+
+                        objMaterial.NormalMapName = destinationFile;
+                        objMaterial.NormalMapSavePath = folder + "/" + destinationFile;
+                        
+                        File.WriteAllBytes(objMaterial.NormalMapSavePath,result_n.EncodeToPNG());
+                        
+                        // result_n.Save(destinationFile, System.Drawing.Imaging.ImageFormat.Png);
+                        // Texture2D tex = Resources.Load(objMaterial.NormalMapName) as Texture2D;
+                        // var img = System.Drawing.Bitmap.FromFile(targetFolder+"\\material\\"+objMaterial.NormalMapName);
+                        // .Save(destinationFile, System.Drawing.Imaging.ImageFormat.Png);
+                            // string array1 = FindFile(Path.GetTempPath(), mats[material].mainTexture.name +"*");
+                        //     string[] array1 = Directory.GetFiles(Path.GetTempPath(), mats[material].mainTexture.name +"*",SearchOption.AllDirectories);
+                            // objMaterial.textureName = AssetDatabase.GetAssetPath(mats[material].mainTexture);
+                    }
+                    
+                }
+                // else{
+                //     material = material;
+                // }
+                flag = mats[material].HasProperty("_Color");
+                // Color color = mats[material].GetColor("_Color");
+                // Color speccolor = mats[material].GetColor("_SpecColor");
+                // if (speccolor.r >0){
+                //     flag = flag;
+                // }
+                if  (flag){
+               
                     objMaterial.color_red = mats[material].color.r;
                     objMaterial.color_green = mats[material].color.g;
                     objMaterial.color_blue = mats[material].color.b;
                     objMaterial.transparent = mats[material].color.a;
                 }
-                else {
-                    material = material;
-                }
+                // else {
+                //     material = material;
+                // }
                 //objMaterial.NormalMapName = null;
-
                 materialList.Add(objMaterial.name, objMaterial);
-                material = material;
             } catch (ArgumentException) {
                 material = material;
                 //Already in the dictionary
@@ -217,34 +273,15 @@ public class EditorObjExporter : ScriptableObject {
                 string d = Convert.ToString(kvp.Value.transparent);
                 
                 sw.Write("\n");
-                sw.Write("newmtl {0}\n", kvp.Key);
+                string name = kvp.Key.Replace(" (Instance)", string.Empty);
+                sw.Write("newmtl {0}\n", name);
                 sw.Write("Ka  {0} {1} {2}\n",r,g,b);
                 sw.Write("Kd  {0} {1} {2}\n",r,g,b);
-                sw.Write("Ks  {0} {1} {2}\n",r,g,b);
+                // sw.Write("Ks  {0} {1} {2}\n",r,g,b);
                 sw.Write("d  {0}\n", d);
                 sw.Write("Ns  0.0\n");
                 sw.Write("illum 1\n");
-
-                if (kvp.Value.textureName != null) {
-                    string destinationFile = kvp.Value.textureName;
-
-
-                    int stripIndex = destinationFile.LastIndexOf('/');//FIXME: Should be Path.PathSeparator;
-
-                    if (stripIndex >= 0)
-                        destinationFile = destinationFile.Substring(stripIndex + 1).Trim();
-
-
-                    destinationFile = destinationFile.Replace(".tif",".png");
-                    destinationFile = destinationFile.Replace(".jpg",".png");
-                    destinationFile = destinationFile.Replace(".JPG",".png");
-                    destinationFile = destinationFile.Replace(".tga",".png");
-                    destinationFile = filename.Replace("|", "_") + "_" + destinationFile;
-                    string relativeFile = destinationFile;
-
-                    destinationFile = folder + "/" +  destinationFile;
-
-                    Debug.Log("Copying texture from " + kvp.Value.textureName + " to " + destinationFile);
+                 
 
                     // try {
                     //     // byte[] imageBytes = File.ReadAllBytes(kvp.Value.textureName);
@@ -261,9 +298,17 @@ public class EditorObjExporter : ScriptableObject {
                     // } catch {
 
                     // }
+                if (kvp.Value.textureName != null) {
+                    string destinationFile = kvp.Value.textureName;
+                    sw.Write("map_Kd {0}", destinationFile);
+                }
 
-
-                    sw.Write("map_Kd {0}", relativeFile);
+                if (kvp.Value.NormalMapName != null) {
+                    if (kvp.Value.textureName != null){
+                        sw.Write("\n");
+                    }
+                    string destinationFile = kvp.Value.NormalMapName;
+                    sw.Write("bump {0}", destinationFile);
                 }
 
                 sw.Write("\n\n\n");
@@ -336,16 +381,17 @@ public class EditorObjExporter : ScriptableObject {
 
 
         for (int i = 0; i < objects.Length; i++) {
+           
             Debug.Log(i.ToString());
-            // if (i==53){
-            //     i = i;
+            // if (i!=89){
+            //     continue;
             // }
             // if (i==177){
             //     i = i;
             // }
             var gameobject = objects[i];
-            if (gameobject.transform.name.Contains("CD|surface")){
-                continue;
+            if (gameobject.transform.name.Contains("Pillow|surface")){
+                i = i;
             }
             if (!gameobject.transform.parent.name.Equals(parentType)){
                 continue;

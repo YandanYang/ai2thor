@@ -1467,7 +1467,7 @@ namespace Thor.Procedural {
             sceneManager.SetupScene(false);
             
             // output objects in scene
-            // EditorObjExporter.ExportEachObectToSingle(8184);
+            // EditorObjExporter.ExportEachObectToSingle(3);
             
             //var agentManager = GameObject.Find("PhysicsSceneManager").GetComponentInChildren<AgentManager>();
            // agentManager.ResetSceneBounds();
@@ -1557,7 +1557,7 @@ namespace Thor.Procedural {
             var navMeshAgent = GameObject.FindObjectOfType<NavMeshAgent>();
 
             navMesh.agentTypeID = navMeshAgent.agentTypeID;
-            var settings = navMesh.GetBuildSettings();
+            var settings = navMesh.GetBuildSettings(); 
             
             navMesh.overrideVoxelSize = voxelSize != null;
             navMesh.voxelSize = voxelSize.GetValueOrDefault(0.0f);
