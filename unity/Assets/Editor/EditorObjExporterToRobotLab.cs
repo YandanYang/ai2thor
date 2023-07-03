@@ -66,10 +66,10 @@ public class EditorObjExporter : ScriptableObject {
             return sb.ToString();
         }
         sb.Append("g ").Append(mf.name).Append("\n");
-        if (m.name.Contains("Statue"))
-        {
-            sb = sb;
-        }
+        // if (m.name.Contains("Statue"))
+        // {
+        //     sb = sb;
+        // }
         foreach (Vector3 lv in m.vertices) {
             Vector3 wv = mf.transform.TransformPoint(lv);
 
@@ -225,7 +225,6 @@ public class EditorObjExporter : ScriptableObject {
                 //objMaterial.NormalMapName = null;
 
                 materialList.Add(objMaterial.name, objMaterial);
-                material = material;
             } catch (ArgumentException) {
                 material = material;
                 //Already in the dictionary
@@ -373,6 +372,7 @@ public class EditorObjExporter : ScriptableObject {
             //     i = i;
             // }
             var gameobject = objects[i];
+            
             if (gameobject.transform.name.Contains("CD|surface")){
                 continue;
             }
