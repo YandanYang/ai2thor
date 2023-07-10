@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='Generate procthor data.')
 
     parser.add_argument(
-        "--datatype", type=str,  default="multiview", help="[\"3D\",\"topdown\",\"multiview\"]"
+        "--datatype", type=str,  default="3D", help="[\"3D\",\"topdown\",\"multiview\"]"
     )
     
     parser.add_argument(
@@ -385,21 +385,21 @@ def GenerateData(args):
 
 
 if __name__ == "__main__":
-    # args = dict(
-    #     W = 500,
-    #     H = 500,
-    #     gridsize=0.1,
-    #     renderDepthImage = True,
-    #     renderNormalsImage=True,
-    #     objData = True,
-    #     rgbData = True,
-    #     NormalData = True,
-    #     DepthData = True,
-    #     frameCnt = 400,
-    #     datatype = "multiview", #["3D","topdown","multiview"]
-    #     local_executable_path = "/home/yandan/workspace/ai2thor/unity/Build/local-build-procthor.x86_64",
-    #     savepath="cube_depth_step03_500_grid01_y180/"
-    # )
+    #args = dict(
+    #    W = 500,
+    #    H = 500,
+    #    gridsize=0.1,
+    #    renderDepthImage = True,
+    #    renderNormalsImage=True,
+    #    objData = True,
+    #    rgbData = True,
+    #    NormalData = True,
+    #    DepthData = True,
+    #    frameCnt = 400,
+    #    datatype = "3D", #["3D","topdown","multiview"]
+    #    local_executable_path = "/home/yandan/workspace/ai2thor/unity/Build/local-build-procthor.x86_64",
+    #    savepath="cube_depth_step03_500_grid01_y180/"
+    #)
     
     args = parse_args()
     GenerateData(args)
