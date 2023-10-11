@@ -38,9 +38,14 @@ then click the button as shown in the following image, Files will be exported in
 
 ## Procthor-10k 3D Dataset 
 
-### 3D Models in Lambda
-    
+
+### 3D Models & originial Json file in Lambda
+
+.obj Models:   
 `/scratch/masaccio/Procthor/ExportedObj-good/House_xxx`
+
+.json files:
+`/scratch/masaccio/Procthor/House_Json`
     
 ### File organization
 Each **House_xxx** folder contains the following files of k objects:
