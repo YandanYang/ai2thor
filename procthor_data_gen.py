@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='Generate procthor data.')
 
     parser.add_argument(
-        "--datatype", type=str,  default="3D", help="[\"3D\",\"topdown\",\"multiview\"]"
+        "--datatype", type=str,  default="json", help="[\"3D\",\"topdown\",\"multiview\",\"json\"]"
     )
     
     parser.add_argument(
@@ -358,26 +358,28 @@ def GenerateData(args):
     for i in range(0,datacnt):
         print("House_"+str(i)+"/")
         house = dataset["train"][i]
-       # with open("House_85.json","w") as f:
-       #     json.dump(house,f)
-        controller = Controller(scene=house,
-                                gridsize=args.gridsize,
-                                width=args.W,
-                                height=args.H,
-                                renderDepthImage=args.renderDepthImage, 
-                                renderNormalsImage=args.renderNormalsImage,
-                                index=i,
-                                local_executable_path = args.local_executable_path)
-        if (args.datatype=="3D"):
-            controller.step(action="SaveHouseToObj",dataset_index=i) 
-        elif (args.datatype=="topdown"):
-            save_top_down_frame(controller,i,args)
-        elif (args.datatype=="multiview"):
-            getMultiViewFrame(controller,args,dataset_index=i)
-        #transform_json = SetFrames(controller,"gen_data/output/House_"+str(i)+"/",args)
-        # with open("gen_data/output/House_"+str(i)+"/" + "transforms.json","w") as f:
-        #    json.dump(transform_json,f)
-        controller.stop()
+        if args.datatype=="json":
+            with open("House_Json/House_"+str(i)+".json","w") as f:
+                json.dump(house,f,indent=4) 
+        else:
+            controller = Controller(scene=house,
+                            gridsize=args.gridsize,
+                            width=args.W,
+                            height=args.H,
+                            renderDepthImage=args.renderDepthImage, 
+                            renderNormalsImage=args.renderNormalsImage,
+                            index=i,
+                            local_executable_path = args.local_executable_path)
+            if (args.datatype=="3D"):
+                controller.step(action="SaveHouseToObj",dataset_index=i) 
+            elif (args.datatype=="topdown"):
+                save_top_down_frame(controller,i,args)
+            elif (args.datatype=="multiview"):
+                getMultiViewFrame(controller,args,dataset_index=i)
+            #transform_json = SetFrames(controller,"gen_data/output/House_"+str(i)+"/",args)
+            # with open("gen_data/output/House_"+str(i)+"/" + "transforms.json","w") as f:
+            #    json.dump(transform_json,f)
+            controller.stop()
     return
         
 
